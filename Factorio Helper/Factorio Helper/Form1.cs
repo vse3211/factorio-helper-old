@@ -12,6 +12,7 @@ using Hooks;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using CsQuery.ExtensionMethods.Internal;
 
 namespace Factorio_Helper
 {
@@ -72,6 +73,7 @@ namespace Factorio_Helper
         public Form1(SecurityProtocolType secConf = SecurityProtocolType.SystemDefault)
         {
             InitializeComponent();
+            button5.Enabled = false;
             if (File.Exists("network.fha"))
             {
                 switch (File.ReadAllText("network.fha"))
@@ -182,7 +184,7 @@ namespace Factorio_Helper
             GetGameVersion();
             updateModsList();
             getAvalibleGameVersion();
-            button5.Visible = false;
+            //button5.Visible = false;
             this.TopMost = false;
             linkLabel8.Text = "Не активно";
             linkLabel14.Text = "Overlay disabled";
@@ -210,6 +212,8 @@ namespace Factorio_Helper
 
         void authCheck(object sender)
         {
+            switchMode(0, 1);
+            return;
             if (authStatus == "true")
             {
                 switchMode(0, 1);
@@ -430,11 +434,26 @@ namespace Factorio_Helper
         #endregion
 
         #region Update avalable game version's
+        string tempServerGame = "";
         void getAvalibleGameVersion()
         {
-            var temp = (MyArray)JsonConvert.DeserializeObject(downloader("Game", "b2.php"), typeof(MyArray));
+            WebRequest request = WebRequest.Create("https://fh.londev.ru/factorio/games.txt");
+            WebResponse response = request.GetResponse();
+            Stream dataStream = response.GetResponseStream();
+            StreamReader reader = new StreamReader(dataStream);
+            try
+            {
+                tempServerGame = reader.ReadToEnd().RemoveWhitespace();
+                button5.Enabled = true;
+            }
+            catch
+            {
 
-            if (temp.stable != null)
+            }
+
+            //MyArray temp = (MyArray)JsonConvert.DeserializeObject(downloader("Game", "available"), typeof(MyArray));
+            /*
+            if (temp != null && temp.stable != null)
             foreach (Versions item in temp.stable)
             {
                 stable[i] = new string[] { null, item.version, item.system };
@@ -447,7 +466,7 @@ namespace Factorio_Helper
                 experimental[i] = new string[] { null, item.version, item.system };
                 i++;
             }
-            i = 0;
+            i = 0;*/
         }
         #endregion
 
@@ -562,12 +581,12 @@ namespace Factorio_Helper
             string isStExp;
             button5.Visible = false;
             if (radioButton1.Checked == true) isStExp = "stable"; else isStExp = "experimental";
-            fileName = isStExp + "_" + listBox4.SelectedItem.ToString() + "_" + listBox3.SelectedItem.ToString() + ".exe";
+            fileName = tempServerGame;
             downloadingType = "game";
             WebClient client = new WebClient();
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
             client.DownloadFileCompleted += new AsyncCompletedEventHandler(client_DownloadFileCompleted);
-            client.DownloadFileAsync(new Uri("https://londev.ru/downloads/factorio/Game/" + fileName), fileName);
+            client.DownloadFileAsync(new Uri("https://fh.londev.ru/factorio/" + fileName), fileName);
         }
         #endregion
 
@@ -655,7 +674,7 @@ namespace Factorio_Helper
         #region GET version list
         void wrtmodver()
         {
-            MLI = (ModsInfoList)JsonConvert.DeserializeObject(simpleDownloader("https://fha.londev.ru/public/mods.json"), typeof(ModsInfoList));
+            MLI = (ModsInfoList)JsonConvert.DeserializeObject(simpleDownloader("https://mods.factorio.com/api/mods?page_size=max"), typeof(ModsInfoList));
         }
         #endregion
 
@@ -663,7 +682,8 @@ namespace Factorio_Helper
         void updateModsList()
         {
             #region Outside mods info parcer
-            wrtmodver();
+            //wrtmodver();
+            if (MLI is null || (MLI != null && MLI.mods is null)) return;
             richTextBox1.Text = richTextBox1.Text + "\nОбновлние списка модов...";
             listBox2.Items.Clear();
             listBox5.Items.Clear();
@@ -1081,16 +1101,28 @@ namespace Factorio_Helper
         }
         #endregion
         #region Download progress changed
+        int prevProgress = 0;
         void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             button1.Enabled = false;
             button2.Enabled = false;
-            progressBar1.Maximum = (int)e.TotalBytesToReceive / 100;
-            progressBar1.Value = (int)e.BytesReceived / 100;
-            richTextBox1.Clear();
-            richTextBox1.Text = richTextBox1.Text + "\nDownloading " + downloadingType + ":" + e.BytesReceived + "/" + e.TotalBytesToReceive + " bytes...";
-            richTextBox1.SelectionStart = richTextBox1.Text.Length;
-            richTextBox1.ScrollToCaret();
+            try
+            {
+                progressBar1.Maximum = 10000;
+                progressBar1.Value = Convert.ToInt32((double)e.BytesReceived / (double)e.TotalBytesToReceive * 10000);
+            }
+            catch
+            {
+                //throw;
+            }
+            if (prevProgress < progressBar1.Value)
+            {
+                richTextBox1.Clear();
+                richTextBox1.Text = richTextBox1.Text + "\nDownloading " + downloadingType + $" {progressBar1.Value/100}%:" + e.BytesReceived + "/" + e.TotalBytesToReceive + " bytes...";
+                richTextBox1.SelectionStart = richTextBox1.Text.Length;
+                richTextBox1.ScrollToCaret();
+                prevProgress = progressBar1.Value;
+            }
         }
         #endregion
         #endregion
@@ -1442,7 +1474,7 @@ namespace Factorio_Helper
                 }
                 else if (lines.Length >= 3)
                 {
-                    authStatus = regUser(lines[0], lines[1], lines[2]);
+                    //authStatus = regUser(lines[0], lines[1], lines[2]);
                     authCheck(sender);
                 }
             }
@@ -1460,11 +1492,11 @@ namespace Factorio_Helper
             {
                 if (radioButton8.Checked)
                 {
-                    authStatus = regUser (textBox5.Text, textBox4.Text, maskedTextBox2.Text);
+                    //authStatus = regUser (textBox5.Text, textBox4.Text, maskedTextBox2.Text);
                 }
                 else
                 {
-                    authStatus = auth (textBox5.Text, textBox4.Text, maskedTextBox2.Text);
+                    //authStatus = auth (textBox5.Text, textBox4.Text, maskedTextBox2.Text);
                 }
                 
                 authCheck(sender);
