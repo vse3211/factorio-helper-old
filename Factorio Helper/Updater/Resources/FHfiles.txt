@@ -1,0 +1,25 @@
+Newtonsoft.Json.xml
+RibbonLib.dll
+System.Net.Http.dll
+System.Security.Cryptography.Algorithms.dll
+System.Security.Cryptography.Encoding.dll
+System.Security.Cryptography.Primitives.dll
+System.Security.Cryptography.X509Certificates.dll
+uap.dll
+VkNet.dll
+VkNet.xml
+Factorio Helper.exe
+Flurl.dll
+Flurl.Http.dll
+Flurl.Http.xml
+Flurl.xml
+HtmlAgilityPack.dll
+HtmlAgilityPack.xml
+InputBox.dll
+Microsoft.Extensions.DependencyInjection.Abstractions.dll
+Microsoft.Extensions.DependencyInjection.Abstractions.xml
+Microsoft.Extensions.DependencyInjection.dll
+Microsoft.Extensions.DependencyInjection.xml
+Microsoft.Extensions.Logging.Abstractions.dll
+Microsoft.Extensions.Logging.Abstractions.xml
+Newtonsoft.Json.dll
