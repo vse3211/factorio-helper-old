@@ -323,6 +323,7 @@ namespace Factorio_Helper
         //0 == FH auth, 1 == FH main, 2 == FD auth, 3 == FD main
         void switchAuth(int v)
         {
+            v = 1;
             //FH auth
             if (v == 0)
             {
@@ -1457,7 +1458,7 @@ namespace Factorio_Helper
 
         private void linkLabel10_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://vk.com/settings");
+            //Process.Start("https://vk.com/settings");
         }
 
         private void button28_Click(object sender, EventArgs e)
